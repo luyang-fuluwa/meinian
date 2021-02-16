@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atguigu.dao.TravelGroupDao">
+
+    <!--    添加跟团游信息-->
+    <insert id="addTravelGroup" parameterType="travelGroup"  keyProperty="id" useGeneratedKeys="true">
+        insert into t_travelgroup(code,name,helpCode,sex,remark,attention)
+        values (#{code},#{name},#{helpCode},#{sex},#{remark},#{attention})
+    </insert>
+
+<!--    在中间表添加数据-->
+    <insert id="addTravelGroupAndTravelItem">
+        insert into t_travelgroup_travelitem (travelgroup_id,travelitem_id)values
+        <foreach collection="list" item="travelItemId" separator=",">
+            (#{travelGroupId},#{travelItemId})
+        </foreach>
+    </insert>
+
+<!--    修改跟团游信息-->
+    <update id="updateTravelGroup" parameterType="com.atguigu.pojo.TravelGroup">
+        update t_travelgroup
+        set code=#{code} , name=#{name} , helpCode=#{helpCode} , sex=#{sex} , remark=#{remark} , attention=#{attention}
+        where id = #{id}
+    </update>
+
+    <!--    删除跟团游-->
+    <delete id="delete">
+        DELETE FROM t_travelgroup
+        WHERE id=#{travelGroupId}
+    </delete>
+
+<!--    删除中间表-->
+    <delete id="deleteTravelGroupAndTravelItem">
+        DELETE FROM t_travelgroup_travelitem
+        WHERE travelgroup_id = #{travelGroupId}
+    </delete>
+
+    <!--根据条件分页查询，当没条件的时候要查询全部-->
+    <select id="findPage" resultType="com.atguigu.pojo.TravelGroup">
+        select * from t_travelgroup
+        <where>
+            <if test="queryString!=null and queryString.length>0">
+                code = #{queryString} or helpCode = #{queryString} or name like "%"#{queryString}"%"
+            </if>
+        </where>
+    </select>
+
+<!--    根据跟团游id查询中间表关联的自由行-->
+    <select id="getTravelGroupAndTravelItem" resultType="java.lang.Integer">
+        select travelitem_id
+        from t_travelgroup_travelitem
+        where travelgroup_id = #{travelgroupId}
+    </select>
+
+<!--    根据id查询跟团游数据-->
+    <select id="getTravelGroupById" resultType="com.atguigu.pojo.TravelGroup">
+        select id,code,name,helpCode,sex,remark,attention
+        from t_travelgroup
+        where id = #{travelGroupId}
+    </select>
+
+
+    <!--    查询所有跟团游信息-->
+    <select id="findAll" resultType="com.atguigu.pojo.TravelGroup">
+        select * from t_travelgroup
+    </select>
+
+<!--    根据SetMeal_id获取TravelGroup_id，再根据TravelGroup_id查询跟团游-->
+    <select id="getTravelGroupsById" resultMap="travelGroup">
+        select * from t_travelgroup
+        where id in (
+        select travelgroup_id from t_setmeal_travelgroup
+        where setmeal_id = #{id}
+        )
+    </select>
+    <resultMap id="travelGroup" type="com.atguigu.pojo.TravelGroup">
+        <id property="id" column="id"/>
+        <result property="code" column="code"/>
+        <result property="name" column="name"/>
+        <result property="helpCode" column="helpCode"/>
+        <result property="sex" column="sex"/>
+        <result property="remark" column="remark"/>
+        <result property="attention" column="attention"/>
+        <collection property="travelItems" column="id" select="com.atguigu.dao.TravelItemDao.getTravelItemsById"/>
+    </resultMap>
+
+    <!--&lt;!&ndash;根据套餐id查询自由行信息&ndash;&gt;
+    <select id="findTravelGroupListById" resultMap="findByIdResultMap" parameterType="int">
+  select * from t_travelgroup where id  in (select travelgroup_id from t_setmeal_travelgroup where setmeal_id=#{id})
+</select>
+
+    <resultMap type="travelGroup" id="findByIdResultMap">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="code" property="code"/>
+        <result column="helpCode" property="helpCode"/>
+        <result column="sex" property="sex"/>
+        <result column="remark" property="remark"/>
+        <result column="attention" property="attention"/>
+        <collection property="travelItems" column="id" select="com.atguigu.dao.TravelItemDao.findTravelItemListById">
+        </collection>
+    </resultMap>-->
+
+</mapper>
+
+
+
+
+
+
+
+

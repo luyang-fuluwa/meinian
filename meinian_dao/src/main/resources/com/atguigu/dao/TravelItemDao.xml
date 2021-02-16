@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atguigu.dao.TravelItemDao">
+
+
+<!-- 新增-->
+    <insert id="add" parameterType="com.atguigu.pojo.TravelGroup">
+        insert into t_travelitem(code,name,sex,age,price,type,remark,attention)
+        values (#{code},#{name},#{sex},#{age},#{price},#{type},#{remark},#{attention})
+    </insert>
+
+<!--    编辑自由行-->
+    <update id="edit" parameterType="com.atguigu.pojo.TravelGroup">
+        update t_travelitem
+        set code = #{code},name = #{name},sex = #{sex},age = #{age},price = #{price},type = #{type},remark = #{remark},attention = #{attention}
+        where id = #{id}
+    </update>
+
+
+    <!--    根据id删除自由行-->
+    <delete id="delete">
+        DELETE FROM t_travelitem
+        WHERE id=#{id}
+    </delete>
+
+
+    <!--根据条件查询-->
+    <select id="findPage" parameterType="string" resultType="com.atguigu.pojo.TravelGroup">
+        select * from t_travelitem
+        <where>
+            <if test="queryString!=null and queryString.length>0">
+                name like "%"#{queryString}"%" or code=#{queryString}
+            </if>
+        </where>
+    </select>
+
+<!--    查询所有自由行-->
+    <select id="getItemsAll" resultType="com.atguigu.pojo.TravelItem">
+        select * from t_travelitem
+    </select>
+
+
+<!--    根据TravelGroup_id获取travelitem_id，再根据travelitem_id查询自由行-->
+    <select id="getTravelItemsById" resultType="com.atguigu.pojo.TravelItem">
+        select * from t_travelitem
+        where id in (
+        select travelitem_id from t_travelgroup_travelitem
+        where travelgroup_id=#{id}
+        )
+    </select>
+
+
+   <!-- 根据跟团游id查询自由行信息
+    <select id="findTravelItemListById" resultType="travelItem" parameterType="int">
+    select * from t_travelitem where id in (select travelitem_id from t_travelgroup_travelitem where travelgroup_id=#{id})
+   </select>-->
+
+</mapper>
+
+
+
+
